@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqlfllite/db/ice_creame_db_provider.dart';
@@ -24,6 +26,17 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
+  // void initFirebase() async {
+  //   WidgetsFlutterBinding.ensureInitialized();
+  //   await Firebase.initializeApp();
+  // }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    // initFirebase();
+  }
+
   @override
   Widget build(BuildContext context) {
     var getProvider = Provider.of<ProviderProduct>(context, listen: true);
@@ -64,7 +77,8 @@ class _OrderPageState extends State<OrderPage> {
                       onPrimary: Colors.white, primary: Colors.green),
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => ReverseSearchPage()),
+                      MaterialPageRoute(
+                          builder: (context) => ReverseSearchPage()),
                     );
                   },
                   child: const Text("Добавить из карты"))
@@ -78,7 +92,13 @@ class _OrderPageState extends State<OrderPage> {
                       content: Text("Сначала добавьте адресс")));
                   return;
                 }
-                print(getProvider.address);
+                FirebaseFirestore.instance.collection('orders').add({
+                  'all_quantity_of_products':
+                      getProvider.getQuantity().toString(),
+                  'total_price': "${getProvider.getAllPrice().toString()}\$",
+                  'address': getProvider.address
+                }).then((value) => print(value));
+ 
                 getProvider.clearCart();
                 DbIceCreamHelper.deleteQuantity(0);
                 DbIceCreamHelper.addressApi("");
@@ -95,7 +115,7 @@ class _OrderPageState extends State<OrderPage> {
               child: const Text(
                 "Отправить",
                 style: TextStyle(fontSize: 20),
-              ))
+              )),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqlfllite/pages/izbranie.dart';
+import 'package:sqlfllite/pages/my_orders_page.dart';
 import 'package:sqlfllite/provider/provider.dart';
 
 class SideBar extends StatelessWidget {
@@ -68,6 +69,12 @@ class SideBar extends StatelessWidget {
               onTap: () {
                 return doTwoTask();
               }),
+          ListTile(
+            leading: const Icon(Icons.food_bank_outlined),
+            title: const Text("Мои заказы"),
+            onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) =>  MyOrdersPage())),
+          ),
         ],
       ),
     );

@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
@@ -63,7 +66,7 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
     // TODO: implement initState
     queryController = TextEditingController(text: '');
     apartmentController = TextEditingController(
-        text: (address != null) ? address!.apartment : '');
+        text: (address != null) ? address!.apartment : '1');
   }
 
   final MapObjectId cameraMapObjectId = const MapObjectId('camera_placemark');
@@ -73,28 +76,34 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
     final mapHeight = 300.0;
     var getProvider = Provider.of<ProviderProduct>(context);
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.amber,
-        onPressed: () {
-          if (apartmentController.text.isNotEmpty) {
-            FocusManager.instance.primaryFocus?.unfocus();
-            _setPoint();
-            print(_point);
-          } else {
-            FocusManager.instance.primaryFocus?.unfocus();
-            ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Добавьте номер квартиры")));
-          }
-        },
-        child: const Icon(
-          Icons.location_on_outlined,
-          color: Colors.black,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 100),
+        child: FloatingActionButton(
+          backgroundColor: Colors.amber,
+          onPressed: () {
+            if (apartmentController.text.isNotEmpty) {
+              FocusManager.instance.primaryFocus?.unfocus();
+              _setPoint();
+              print(_point);
+            } else {
+              FocusManager.instance.primaryFocus?.unfocus();
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Добавьте номер квартиры")));
+            }
+          },
+          child: const Icon(
+            Icons.location_on_outlined,
+            color: Colors.black,
+          ),
         ),
       ),
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         actions: [
-          TextButton(
+          ElevatedButton(
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.green)),
               onPressed: () {
                 if (street.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -110,16 +119,16 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
                   ));
                   return;
                 }
-                getProvider
-                    .updateAddress("${street}/${apartmentController.text}");
+                getProvider.updateAddress(
+                    "${street} квартира ${apartmentController.text}");
                 DbIceCreamHelper.addressApi(
                     "${street}/${apartmentController.text}");
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => const OrderPage()));
               },
-              child: Text(
+              child: const Text(
                 "Добавить адресс",
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ))
         ],
         elevation: 0,
@@ -164,105 +173,129 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
                                   () => showModalBottomSheet(
                                       context: context,
                                       builder: (context) {
-                                        return ListView.builder(
-                                            shrinkWrap: true,
-                                            physics:
-                                                const NeverScrollableScrollPhysics(),
-                                            itemCount: searchResults.length,
-                                            itemBuilder: (context, index) {
-                                              return GestureDetector(
-                                                onTap: () async {
-                                                  street = searchResults[index]
-                                                          ['name']
-                                                      .toString();
-                                                  List<String> coords =
-                                                      searchResults[index]
-                                                              ['Point']['pos']
-                                                          .toString()
-                                                          .split(' ');
-                                                  setState(() {
-                                                    if (address != null) {
-                                                      address!.street =
-                                                          searchResults[index]
-                                                              ['name'];
-                                                      address!.lat =
-                                                          double.parse(
-                                                              coords[1]);
-                                                      address!.lon =
-                                                          double.parse(
-                                                              coords[0]);
-                                                    } else {
-                                                      address = Address(
-                                                          street: searchResults[
-                                                              index]['name'],
-                                                          lat: double.parse(
-                                                              coords[1]),
-                                                          lon: double.parse(
-                                                              coords[0]));
-                                                    }
-                                                  });
-                                                  await controller.moveCamera(
-                                                      CameraUpdate.newCameraPosition(
-                                                          CameraPosition(
-                                                              target: Point(
-                                                                  latitude:
-                                                                      address!
-                                                                          .lat,
-                                                                  longitude:
-                                                                      address!
-                                                                          .lon),
-                                                              zoom: 12)));
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Container(
-                                                  color: Colors.grey[200],
-                                                  padding:
-                                                      const EdgeInsets.all(8),
-                                                  margin: const EdgeInsets.only(
-                                                      bottom: 5),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
+                                        if (searchResults.isNotEmpty) {
+                                          return ListView.builder(
+                                              shrinkWrap: true,
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
+                                              itemCount: searchResults.length,
+                                              itemBuilder: (context, index) {
+                                                return GestureDetector(
+                                                  onTap: () async {
+                                                    street =
                                                         searchResults[index]
                                                                 ['name']
-                                                            .toString()
-                                                            .toString()
-                                                            .trim(),
-                                                        overflow:
-                                                            TextOverflow.clip,
-                                                        style: const TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w500),
-                                                      ),
-                                                      Text(
+                                                            .toString();
+                                                    List<String> coords =
                                                         searchResults[index]
-                                                                ['description']
+                                                                ['Point']['pos']
                                                             .toString()
-                                                            .trim(),
-                                                        overflow:
-                                                            TextOverflow.clip,
-                                                        style: TextStyle(
-                                                            color: Colors
-                                                                .grey[600],
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w500),
-                                                      ),
-                                                    ],
+                                                            .split(' ');
+                                                    setState(() {
+                                                      if (address != null) {
+                                                        address!.street =
+                                                            searchResults[index]
+                                                                ['name'];
+                                                        address!.lat =
+                                                            double.parse(
+                                                                coords[1]);
+                                                        address!.lon =
+                                                            double.parse(
+                                                                coords[0]);
+                                                      } else {
+                                                        address = Address(
+                                                            street:
+                                                                searchResults[
+                                                                        index]
+                                                                    ['name'],
+                                                            lat: double.parse(
+                                                                coords[1]),
+                                                            lon: double.parse(
+                                                                coords[0]));
+                                                      }
+                                                    });
+                                                    final cameraPos =
+                                                        await controller
+                                                            .getCameraPosition();
+                                                    await controller.moveCamera(
+                                                        CameraUpdate.newCameraPosition(
+                                                            CameraPosition(
+                                                                target: Point(
+                                                                    latitude:
+                                                                        address!
+                                                                            .lat,
+                                                                    longitude:
+                                                                        address!
+                                                                            .lon),
+                                                                zoom: cameraPos
+                                                                    .zoom)));
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Container(
+                                                    color: Colors.grey[200],
+                                                    padding:
+                                                        const EdgeInsets.all(8),
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            bottom: 5),
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          searchResults[index]
+                                                                  ['name']
+                                                              .toString()
+                                                              .toString()
+                                                              .trim(),
+                                                          overflow:
+                                                              TextOverflow.clip,
+                                                          style: const TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
+                                                        ),
+                                                        Text(
+                                                          searchResults[index][
+                                                                  'description']
+                                                              .toString()
+                                                              .trim(),
+                                                          overflow:
+                                                              TextOverflow.clip,
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey[600],
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
+                                                );
+                                              });
+                                        } else {
+                                          return SizedBox(
+                                            height: 50,
+                                            child: Row(
+                                              children: const [
+                                                Text(
+                                                  "Nothing found",
+                                                  style:
+                                                      TextStyle(fontSize: 20),
                                                 ),
-                                              );
-                                            });
+                                              ],
+                                            ),
+                                          );
+                                        }
                                       }));
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -273,7 +306,7 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
                               return;
                             }
                           },
-                          icon: Icon(Icons.search_rounded)))
+                          icon: const Icon(Icons.search_rounded)))
                 ],
               ),
               Container(
@@ -294,12 +327,12 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
           SizedBox(
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height - 200,
+            height: MediaQuery.of(context).size.height - 220,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -329,13 +362,14 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 30),
-            child: street == ""
-                ? const Text("Адресс :")
-                : Expanded(
-                    child: Text(
-                        "Адресс : $street квартира ${apartmentController.text}")),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 15, left: 5),
+              child: street == ""
+                  ? const Text("Адресс :")
+                  : Text(
+                      "Адресс : $street апартамент ${apartmentController.text}"),
+            ),
           ),
           // const SizedBox(height: 20),
           // Expanded(
@@ -732,8 +766,9 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
                 searchResults = temp;
               });
             } else {
-              EasyLoading.showError(
-                  'No results can be found for this address!');
+              //if the address was not found will show this message that the address not
+              // EasyLoading.showError(
+              //     'No results can be found for this address!');
             }
           } else {
             EasyLoading.dismiss();
@@ -764,7 +799,14 @@ class _ReverseSearchExampleState extends State<_ReverseSearchExample> {
     SearchSessionResult result = await resultWithSession.result;
     if (result.error != null) {
       EasyLoading.dismiss();
-      EasyLoading.showError("SOMETHING_WENT_WRONG");
+      // showSimpleNotification(Text("Проблемы с подключением"),
+      //     background: Colors.redAccent);
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Проблемы с подключением"),
+          backgroundColor: Colors.redAccent));
+      // EasyLoading.showError("SOMETHING_WENT_WRONG");
       return;
     }
     setState(() {

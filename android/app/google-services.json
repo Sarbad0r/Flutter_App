@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "398823638023",
+    "project_id": "productsconfirm",
+    "storage_bucket": "productsconfirm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:398823638023:android:66e91e50f97701a08b96a2",
+        "android_client_info": {
+          "package_name": "com.example.sqlfllite"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "398823638023-8uiqtbhr7rd0tt34q9nenkvvv67r3l2v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfS6Drzpjo45NFlNMZZDZfOwVEBnL8coE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "398823638023-8uiqtbhr7rd0tt34q9nenkvvv67r3l2v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

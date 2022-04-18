@@ -1,14 +1,18 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 import 'package:sqlfllite/home_page.dart';
 import 'package:sqlfllite/provider/bundleProvider.dart';
+import 'package:sqlfllite/provider/check_internet_provider.dart';
 import 'package:sqlfllite/provider/provider.dart';
 import 'package:sqlfllite/screens/loading_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized;
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
   // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
   //   systemNavigationBarColor: Colors.black, // navigation bar color
   //   statusBarColor: Colors.amber, // status bar color
@@ -16,7 +20,9 @@ void main() async {
   // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(
     MultiProvider(
-      providers: [  
+      providers: [
+        ChangeNotifierProvider<CheckInternetProvider>(
+            create: (_) => CheckInternetProvider()),
         ChangeNotifierProvider<ProviderProduct>(
             create: (_) => ProviderProduct()),
         ChangeNotifierProvider<BundleProvider>(

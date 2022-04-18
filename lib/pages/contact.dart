@@ -6,6 +6,7 @@ class Contacts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String number = "+992111111111";
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -36,7 +37,9 @@ class Contacts extends StatelessWidget {
                       width: 150,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () async{
+                          launch('tel://$number');
+                        },
                         child: const Text("Позвонить"),
                         style: ButtonStyle(
                             backgroundColor:
